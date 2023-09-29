@@ -1090,11 +1090,6 @@ if(NOT CLANG_TIDY)
   endif()
 endif()
 
-if(NOT CLANG_TIDY)
-  if(${BUILD_IMMERSIVE})
-    add_subdirectory(immersive)
-  endif()
-endif()
 
 # Deploys extensions to a local repository (a folder structure that contains the duckdb version + binary arch)
 if (NOT "${LOCAL_EXTENSION_REPO}" STREQUAL "")
