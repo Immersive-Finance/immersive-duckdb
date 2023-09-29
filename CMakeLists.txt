@@ -85,6 +85,8 @@ endif()
 
 option(DISABLE_UNITY "Disable unity builds." FALSE)
 
+set(PYTHON_EXECUTABLE "${CMAKE_SOURCE_DIR}/venv310/bin/python3")
+
 option(FORCE_COLORED_OUTPUT
        "Always produce ANSI-colored output (GNU/Clang only)." FALSE)
 if(${FORCE_COLORED_OUTPUT})
@@ -314,11 +316,11 @@ option(BUILD_TPCE "Enable building of the TPC-E tool." FALSE)
 option(DISABLE_BUILTIN_EXTENSIONS "Disable linking extensions." FALSE)
 option(JDBC_DRIVER "Build the DuckDB JDBC driver" FALSE)
 option(BUILD_ODBC_DRIVER "Build the DuckDB ODBC driver" FALSE)
-option(BUILD_PYTHON "Build the DuckDB Python extension" FALSE)
+option(BUILD_PYTHON "Build the DuckDB Python extension" TRUE)
 option(BUILD_NODE "Build the DuckDB Node extension" FALSE)
 option(USER_SPACE "Build the DuckDB Python in the user space" FALSE)
 option(FORCE_QUERY_LOG "If enabled, all queries will be logged to the specified path" OFF)
-option(BUILD_SHELL "Build the DuckDB Shell and SQLite API Wrappers" TRUE)
+option(BUILD_SHELL "Build the DuckDB Shell and SQLite API Wrappers" FALSE)
 option(DISABLE_THREADS "Disable support for multi-threading" FALSE)
 option(DISABLE_EXTENSION_LOAD "Disable support for loading and installing extensions" FALSE)
 option(DISABLE_STR_INLINE "Debug setting: disable inlining of strings" FALSE)
@@ -331,6 +333,7 @@ option(DEBUG_STACKTRACE "Debug setting: print a stracktrace on asserts and when 
 option(DEBUG_MOVE "Debug setting: Ensure std::move is being used" FALSE)
 option(CLANG_TIDY "Enable build for clang-tidy, this disables all source files excluding the core database. This does not produce a working build." FALSE)
 option(BUILD_UNITTESTS "Build the C++ Unit Tests." TRUE)
+option(BUILD_IMMERSIVE "Build the Immersive Test Harness." TRUE)
 option(EXTENSION_CONFIG_BUILD "Produce extension configuration artifacts instead of building. (such as shared vcpkg.json, extensions.txt)" FALSE)
 option(CUSTOM_LINKER "Use a custom linker program" "")
 option(
@@ -1040,7 +1043,7 @@ if(BUILD_PYTHON
       add_custom_target(
               duckdb_python ALL
               COMMAND
-              python3 setup.py install --user --binary-dir=${PROJECT_BINARY_DIR}
+              ${PYTHON_EXECUTABLE} setup.py install --user --binary-dir=${PROJECT_BINARY_DIR}
               --compile-flags=${ALL_COMPILE_FLAGS} --libs="${duckdb_libs}"
               DEPENDS duckdb duckdb_static
               WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tools/pythonpkg
@@ -1049,7 +1052,7 @@ if(BUILD_PYTHON
     else()
       add_custom_target(
               duckdb_python ALL
-              COMMAND python3 setup.py install --binary-dir=${PROJECT_BINARY_DIR}
+              COMMAND ${PYTHON_EXECUTABLE} setup.py install --binary-dir=${PROJECT_BINARY_DIR}
               --compile-flags=${ALL_COMPILE_FLAGS} --libs="${duckdb_libs}"
               DEPENDS duckdb duckdb_static
               WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tools/pythonpkg
@@ -1084,6 +1087,12 @@ if(NOT CLANG_TIDY)
   endif()
   if (NOT EXTENSION_CONFIG_BUILD)
     add_subdirectory(third_party)
+  endif()
+endif()
+
+if(NOT CLANG_TIDY)
+  if(${BUILD_IMMERSIVE})
+    add_subdirectory(immersive)
   endif()
 endif()
 
