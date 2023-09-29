@@ -2,10 +2,11 @@
 //
 
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include "CalculationTable.h" // Assuming this is where your class is defined
+//#include <pybind11/pybind11.h>
+//#include <pybind11/stl.h>
+//#include "CalculationTable.h" // Assuming this is where your class is defined
 
+/*
 namespace py = pybind11;
 
 PYBIND11_MODULE(immersive_test_duckdb, m) {
@@ -17,22 +18,22 @@ PYBIND11_MODULE(immersive_test_duckdb, m) {
 	         py::arg("fwd"), py::arg("vol"), py::arg("greek"))
 	    .def("calculate", &CalculationTable::calculate);
 }
+*/
 
+#include "CalculationTable.h"
 
-//#include "CalculationTable.h"
-//
-//#include <iostream>
-//
-//int main() {
-//	try {
-//		CalculationTable calc_table;
-//		calc_table.insert_row(1, 1, 1, 1, 104, 1, 1, 101, 102, 0.2, "PV");
-//		calc_table.calculate();
-//	} catch (const std::exception &ex) {
-//		std::cerr << "Caught exception: " << ex.what() << std::endl;
-//		return 1;
-//	}
-//}
+#include <iostream>
+
+int main() {
+	try {
+		CalculationTable calc_table;
+		calc_table.insert_row(1, 1, 1, 1, 104, 1, 1, 101, 102, 0.2, "PV");
+		calc_table.calculate();
+	} catch (const std::exception &ex) {
+		std::cerr << "Caught exception: " << ex.what() << std::endl;
+		return 1;
+	}
+}
 
 // int main()
 //{

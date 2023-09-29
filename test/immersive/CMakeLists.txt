@@ -6,6 +6,7 @@ add_library_unity(
         test_immersive
         OBJECT
         test_calculation_table.cpp
+        ../../immersive/BlackScholes.cpp
         ../../immersive/CalculationTable.cpp
 )
 

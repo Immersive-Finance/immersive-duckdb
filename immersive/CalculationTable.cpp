@@ -1,15 +1,13 @@
-//
-// Created by paul on 29/09/23.
-//
-#include "BlackScholes.h"
 #include "duckdb.hpp"
-
 #include <chrono>
+
 #include <iostream>
 #include <mutex>
 #include <random>
 #include <sstream>
 #include <string>
+
+#include "CalculationTable.h"
 
 std::mutex id_generation_mutex;
 std::string generate_unique_id() {
@@ -50,7 +48,8 @@ static void calculate_pv(duckdb::DataChunk &input, duckdb::ExpressionState &stat
 
 }
 
-inline CalculationTable::CalculationTable(bool share) {
+CalculationTable::CalculationTable(bool share) {
+
 
 	dbname = share ? "immersive_calculation_table.db" : ":memory:";
 	auto db = duckdb::make_uniq<duckdb::DuckDB>(dbname);
@@ -66,13 +65,14 @@ inline CalculationTable::CalculationTable(bool share) {
 
 
 }
-inline CalculationTable::~CalculationTable() {
+
+CalculationTable::~CalculationTable() {
 
 	std::string drop_table_query = "DROP TABLE " + table_name + ";";
 	conn->Query(drop_table_query);
 }
 
-inline void CalculationTable::create_table() {
+void CalculationTable::create_table() {
 	std::string create_table_query = "CREATE TABLE " + table_name +
 	                                 " ("
 	                                 "scenario_id INTEGER, "
@@ -92,7 +92,7 @@ inline void CalculationTable::create_table() {
 	conn->Query(create_table_query);
 }
 
-inline void CalculationTable::insert_row(int scenario_id, int trade_id, double notional, int cp, double K, double T,
+void CalculationTable::insert_row(int scenario_id, int trade_id, double notional, int cp, double K, double T,
                                          double sqrt_T, double spot, double fwd, double vol, std::string greek) {
 
 	std::string insert_query = "INSERT INTO " + table_name +
@@ -103,7 +103,7 @@ inline void CalculationTable::insert_row(int scenario_id, int trade_id, double n
 	prepared->Execute(scenario_id, trade_id, notional, cp, K, T, sqrt_T, spot, fwd, vol, greek);
 }
 
-inline void CalculationTable::calculate() {
+void CalculationTable::calculate() {
 
 	auto result =
 	    conn->Query("UPDATE " + table_name + " SET pv = update_value(notional, cp, K, spot, fwd, vol, T, sqrt_T);");
@@ -117,12 +117,12 @@ inline void CalculationTable::calculate() {
 	//result->Print();
 }
 
-inline void CalculationTable::append_rows(const std::vector<std::tuple<int, int, double, int, double, double, double, double, double, double, std::string>> &rows) {
+void CalculationTable::append_rows(const std::vector<std::tuple<int, int, double, int, double, double, double, double, double, double, std::string>> &rows) {
 
 	duckdb::Appender appender(*conn, table_name);
 
 	// Loop to insert 1 million rows
-	for (int i = 0; i < rows.size(); ++i) {
+	for (uint64_t i = 0; i < rows.size(); ++i) {
 
 		//read the variables from the rows vector
 		int scenario_id = std::get<0>(rows[i]);
@@ -159,4 +159,13 @@ inline void CalculationTable::append_rows(const std::vector<std::tuple<int, int,
 	// Commit the transaction
 	appender.Close();
 
+}
+const duckdb::shared_ptr<duckdb::Connection> &CalculationTable::getConn() const {
+	return conn;
+}
+const std::string &CalculationTable::getDbname() const {
+	return dbname;
+}
+const std::string &CalculationTable::getTableName() const {
+	return table_name;
 }

@@ -36,8 +36,14 @@ public:
 	void calculate();
 
 	void append_rows(const std::vector<std::tuple<int, int, double, int, double, double, double, double, double, double, std::string>> &rows);
+
+public:
+	const duckdb::shared_ptr<duckdb::Connection> &getConn() const;
+	const std::string &getDbname() const;
+	const std::string &getTableName() const;
+
 private:
-	std::unique_ptr<duckdb::Connection> conn;
+	duckdb::shared_ptr<duckdb::Connection> conn;
 	std::string dbname;
 	std::string table_name;
 };
