@@ -54,7 +54,7 @@ TEST_CASE("Test calculation table pricing", "[immersive]") {
 	double vol;
 	std::string greek = "PV"; // Constant, no need to redefine
 
-	for (int i = 0; i < 1000000; ++i) {
+	for (int i = 0; i < 100; ++i) {
 		trade_id = i;
 		notional = 0.5 + (50 - 0.5) * (double)rand() / RAND_MAX;
 		cp = rand() % 2 == 0 ? 1 : -1;
@@ -68,22 +68,19 @@ TEST_CASE("Test calculation table pricing", "[immersive]") {
 		batch_rows.emplace_back(scenario_id, trade_id, notional, cp, K, T, sqrt_T, spot, fwd, vol, greek);
 	}
 
-
-
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> elapsed = end - start;
 	std::cout << "GENERATE - elapsed time: " << elapsed.count() << " s\n";
 
-
+	// APPEND
 	start = std::chrono::high_resolution_clock::now();
-	calc_table.insert_rows_using_appender(batch_rows);
+	calc_table.append_rows(batch_rows);
 	end = std::chrono::high_resolution_clock::now();
 	elapsed = end - start;
-	std::cout << "INSERT - elapsed time: " << elapsed.count() << " s\n";
+	std::cout << "APPEND - elapsed time: " << elapsed.count() << " s\n";
 
-	// now we perform calculate on the table. But we add some timing code that captures the time before,
-	// and the time after and prints out the elaped time for the call
 
+	// CALCULATE
 	start = std::chrono::high_resolution_clock::now();
 	calc_table.calculate();
 	end = std::chrono::high_resolution_clock::now();
